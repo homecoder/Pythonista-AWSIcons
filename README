@@ -1,0 +1,25 @@
+# Pythonista-AWSIcons
+
+This isn't extremely useful for Pythonista users; however it will service as an example of using some of the photos library functionality.
+
+Note: This will *only* work in 
+
+## What it does it do?
+
+A class which provides the following examples:
+* List albums
+* Create a new album (checks for existing album)
+* Add image to album
+* Add bulk images to album
+    * This adds the images individually so that I can give a progress update using Pythonista's ui
+    * Images can either be a Pythonista Asset or a file
+    * Checks for file existence
+* Abundance of exception handling
+* Commented
+    * Sphinx comments will be done later, I've been changing my mind a lot on this
+
+## Why do it? Why on github?
+
+Good Question - I did this because I am using the mobile app [Flowdia Diagrams](https://itunes.apple.com/us/app/flowdia-diagrams/id1170864140?mt=8). It doesn't (to my knowledge) 
+
+I've uploaded it to github in order to share.
