@@ -174,6 +174,8 @@ class ExporterGUI (ui.View):
         self.background_color = '#fff'
         w, h = ui.get_window_size()
         self.frame = (0,0, w, h)
+        
+        title_preview_buffer = 20
         title_text = 'AWS Image Export'
         title_font = ('<System>', 22)
         _, title_height = ui.measure_string(
@@ -191,18 +193,33 @@ class ExporterGUI (ui.View):
                     alignment=ui.ALIGN_CENTER,
                 )
         
-        pi_y = None # TBD - taking a break
+        # Preview Image
+        pi_y = (title_y+title_height+title_preview_buffer)
+        pi_x = (w / 2) - 45
         preview_image = ui.ImageView()
         preview_image.frame = (
-            30,
-            (),
-            50,
-            50,
+            pi_x,
+            pi_y,
+            75,
+            75,
         )
         
         preview_image.image = (
             ui.Image('images/AI_AmazonLex.png')
         )
+        
+        # Status Label
+        
+        ## TODO: Status Label
+        
+        # Filename Label
+        
+        ## TODO: Filename Label
+        
+        # Progress Label
+        
+        ## TODO: Progress Label
+        
         self.add_subview(preview_image)
         self.add_subview(title)
     
