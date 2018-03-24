@@ -8,12 +8,14 @@ import os
 import ui
 import photos
 import console
+from glob import glob
 
 
 class AWSImageExporter (object):
     
     
     def __init__(self, source_path=None):
+        
         if not source_path:
             source_path = os.getcwd()
         
@@ -167,62 +169,168 @@ class AWSImageExporter (object):
 class ExporterGUI (ui.View):
     """
     UI and Implementation of AWSImageExporter
+    
+    This utilizes the built-in GUI components native to iOS.
+    The commands used below are wrappers available in the
+    Pythonista Library.
+    
+    There is also the option of using a WYSIWYG style editor,
+    but that seems so much less fun.
     """
     
     def __init__(self):
+        
+        self.animate_demo = True
         self.flex = 'WH'
+        self.name = 'AWS Image Export'
         self.background_color = '#fff'
         w, h = ui.get_window_size()
         self.frame = (0,0, w, h)
+        buffer = 20
         
-        title_preview_buffer = 20
+        # Setup Exporter
+        
+        self.exporter = AWSImageExporter()
+        
+        # Setup images
+        self.image_list = {}
+        self.all_images = [] 
+        
+        # Setup Categories
+        self.categories = []
+        
+        # Grab Images into above vars
+        self.load_images()
+        
+        # Remove duplicates in categories, and sort
+        self.categories = sorted(list(set(self.categories)))
+        
+        
         title_text = 'AWS Image Export'
         title_font = ('<System>', 22)
         _, title_height = ui.measure_string(
                               title_text,
                               max_width=w,
                               font=title_font,
-                              alignment=ui.ALIGN_CENTER,
-                          )
-        title_y = int(h * 0.15)
+                              alignment=ui.ALIGN_CENTER)
+        title_y = int(h * 0.06)
         title = ui.Label(
                     text=title_text,
                     name='title',
                     frame=(0, title_y, w, title_height),
                     font=title_font,
                     alignment=ui.ALIGN_CENTER,
+                    flex='WB'
                 )
         
         # Preview Image
-        pi_y = (title_y+title_height+title_preview_buffer)
+        pi_y = (title_y+title_height+buffer)
         pi_x = (w / 2) - 45
-        preview_image = ui.ImageView()
-        preview_image.frame = (
+        self.preview_image = ui.ImageView(flex='LBR')
+        self.preview_image.frame = (
             pi_x,
             pi_y,
             75,
             75,
         )
         
-        preview_image.image = (
-            ui.Image('images/AI_AmazonLex.png')
+        self.preview_image.image = (
+            ui.Image('images/Database_AmazonElasticCache_Memcached.png')
         )
+        
+        self.demo_image_id = 0
+        
+        ui.delay(self.preview_image_demo, 3)
         
         # Status Label
         
-        ## TODO: Status Label
+        sl_y = (pi_y+75+buffer)
+        self.status_label_text = '{} Images to Export'.format(len(self.all_images))
+        _, sl_h = ui.measure_string(
+            self.status_label_text,
+            max_width=w,
+            font=title_font,
+            alignment=ui.ALIGN_CENTER)
         
-        # Filename Label
+        status_label = ui.Label(
+            text=self.status_label_text,
+            frame=(0, sl_y, w, sl_h),
+            alignment=ui.ALIGN_CENTER,
+            flex='WB'
+        )
         
-        ## TODO: Filename Label
+        # Now - instead of whatever I was thinking before..
         
-        # Progress Label
+        # Setup Select Category Button
+        self.sc_button = ui.Button(
+            name='sc_button',
+            title='Select Categories',
+            action=None # TODO: Set Action
+        )
         
-        ## TODO: Progress Label
+        # TODO: Reset Categories Button
         
-        self.add_subview(preview_image)
+        # TODO: Start Export Button
+        
+        
+        
+        self.add_subview(self.preview_image)
         self.add_subview(title)
+        self.add_subview(status_label)
     
+    def preview_image_demo(self, sender=None):
+        """
+        Animate the preview image..
+        I've selected between memcached and redis, as it is..
+        
+        My initials - M, R.
+        """
+        preview_images = [
+            ui.Image('images/Database_AmazonElasticCache_Memcached.png'),
+            ui.Image('images/Database_AmazonElasticCache_Redis.png'),
+        ]
+        
+        # Switch between 1 and 0
+        self.demo_image_id = int(not self.demo_image_id)
+        # Could also do: abs(self.demo_image_id + -1)
+        # I ❤️ Math, so logical, and in this case, so finite
+        # Is it sad if I am laughing to myself?
+        
+        self.preview_image.image = preview_images[
+            self.demo_image_id
+        ]
+        if self.animate_demo:
+            ui.delay(self.preview_image_demo, 3)
+        
+        return 
+    
+    def load_images(self):
+        """
+        Load all .png images from the images folder
+        """
+        images = glob(
+            os.path.join(
+                os.getcwd(), 
+                'images', 
+                '*.png'
+            )
+        )
+        
+        for image in images:
+            self.all_images.append(str(image))
+            c = str(image).split('_')
+            category = c[0]
+            self.categories.append(category)
+            if category not in self.image_list.keys():
+                self.image_list[category] = []
+            
+            self.image_list[category].append(str(image))
+        return 
+    
+    def will_close(self):
+        # Disable the demo run - else it will keep going after closing the window
+        self.animate_demo = False
+        return 
 
 
 if __name__ == '__main__':
@@ -232,8 +340,4 @@ if __name__ == '__main__':
     awsie = AWSImageExporter()
     v = ExporterGUI()
     v.present('sheet')
-    #t = awsie.albums[0]
-    """
-'add_assets', 'assets', 'can_add_assets', 'can_delete', 'can_remove_assets', 'can_rename', 'delete', 'end_date', 'local_id', 'remove_assets', 'start_date', 'subtype', 'title', 'type']    
-    """
 
