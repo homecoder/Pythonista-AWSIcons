@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#!python3
+#tttt!python3
 """
 Small script to import all of the AWS Photos into a single album in iOS Photos
 """
@@ -294,7 +294,6 @@ class ExporterGUI (ui.View):
         self.demo_image_id = int(not self.demo_image_id)
         # Could also do: abs(self.demo_image_id + -1)
         # I ❤️ Math, so logical, and in this case, so finite
-        # Is it sad if I am laughing to myself?
         
         self.preview_image.image = preview_images[
             self.demo_image_id
@@ -339,5 +338,6 @@ if __name__ == '__main__':
     """
     awsie = AWSImageExporter()
     v = ExporterGUI()
-    v.present('sheet')
+    #v.present('sheet')
+    v.present('panel')
 
