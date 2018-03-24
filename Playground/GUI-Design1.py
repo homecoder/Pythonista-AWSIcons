@@ -7,6 +7,8 @@ Design Notes:
 """
 
 import ui
+import os
+from glob import glob
 
 def set_layout_view_style(view):
     view_options = dict(
@@ -33,11 +35,27 @@ left_buttons = [
     )
 ]
 
+# load sample images
+source_glob = os.path.normpath(
+    os.path.join('..','images','*.png')
+)
+
+sample_images = list(glob(source_glob))[0:19]
+images_list = []
+for image in sample_images:
+    images_list.append({
+        'image': ui.Image(image),
+        'title': os.path.basename(image)
+    })
+
+list_data = ui.ListDataSource(images_list)
+
 v = ui.load_view()
 
 # Setup Layout View
 set_layout_view_style(v)
 v.right_button_items = right_buttons
 v.left_button_items = left_buttons
+v['main']['images'].data_source = list_data
 v.present('sheet')
 #v.present('panel')

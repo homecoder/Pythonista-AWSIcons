@@ -47,7 +47,7 @@
             "attributes" : {
               "flex" : "WH",
               "data_source_items" : "Image 1\nImage 2\nImage 3",
-              "name" : "tableview1",
+              "name" : "images",
               "frame" : "{{54, 134}, {200, 200}}",
               "data_source_number_of_lines" : 1,
               "class" : "TableView",
