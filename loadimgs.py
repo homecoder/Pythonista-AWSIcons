@@ -5,13 +5,21 @@ Small script to import all of the AWS Photos into a single album in iOS Photos
 """
 
 import os
+import ui
 import photos
 import console
 
 
 class AWSImageExporter (object):
     
-    def __init__(self):
+    
+    def __init__(self, source_path=None):
+        if not source_path:
+            source_path = os.getcwd()
+        
+        if not os.path.exists(source_path):
+            raise FileNotFoundError('Invalid path')
+        
         # Setup Class Properties
         self.albums = []
         self.album_titles = []
@@ -105,11 +113,19 @@ class AWSImageExporter (object):
             raise TypeError('Invalid Album. Must be Pythonista AssetCollection')
         
         if not album.can_add_assets():
-            self._alert_error('You can\'t add images to the album {}'.format(album.title))
+            if batch:
+                self.errors.append('You can\'t add images to the album {}'.format(album.title))
+            else:
+                self._alert_error('You can\'t add images to the album {}'.format(album.title))
             return False
         
         if isinstance(image, (list, tuple,)):
-            # Technically allowed, but I dont want to.
+            """
+            Technically allowed, but I dont want to.
+            This is NOT pythonic is any way - don't do this
+            I am doing it because I am testing something...
+            """
+            raise PermissionError('I am not giving you permission to use lists/tuples.')
             pass
         
         if not isinstance(image, photos.Asset):
@@ -123,7 +139,9 @@ class AWSImageExporter (object):
                   any exception beyond a base exception (captured above).
             """
             self._alert_error('Unable to add assets to album {}. \nError: {}'.format(album.title, e))
-            
+            if batch:
+                # Stop execution on batch run.
+                raise e
         return False
     
     def album_add_batch_images(self, album, images):
@@ -139,16 +157,65 @@ class AWSImageExporter (object):
             images_to_add.append(self.image_to_asset(image, batch=True))
         
         # Add all of those images to the album
+        total_images = len(images_to_add)
+        count = 0
+        for image in images_to_add:
+            self.album_add_image(albun, image, batch=True)
+            count += 1
+            
+
+class ExporterGUI (ui.View):
+    """
+    UI and Implementation of AWSImageExporter
+    """
+    
+    def __init__(self):
+        self.flex = 'WH'
+        self.background_color = '#fff'
+        w, h = ui.get_window_size()
+        self.frame = (0,0, w, h)
+        title_text = 'AWS Image Export'
+        title_font = ('<System>', 22)
+        _, title_height = ui.measure_string(
+                              title_text,
+                              max_width=w,
+                              font=title_font,
+                              alignment=ui.ALIGN_CENTER,
+                          )
+        title_y = int(h * 0.15)
+        title = ui.Label(
+                    text=title_text,
+                    name='title',
+                    frame=(0, title_y, w, title_height),
+                    font=title_font,
+                    alignment=ui.ALIGN_CENTER,
+                )
         
-            
-            
+        pi_y = None # TBD - taking a break
+        preview_image = ui.ImageView()
+        preview_image.frame = (
+            30,
+            (),
+            50,
+            50,
+        )
+        
+        preview_image.image = (
+            ui.Image('images/AI_AmazonLex.png')
+        )
+        self.add_subview(preview_image)
+        self.add_subview(title)
+    
+
 
 if __name__ == '__main__':
     """
     Main Application
     """
     awsie = AWSImageExporter()
-    t = awsie.albums[0]
+    v = ExporterGUI()
+    v.present('sheet')
+    #t = awsie.albums[0]
     """
 'add_assets', 'assets', 'can_add_assets', 'can_delete', 'can_remove_assets', 'can_rename', 'delete', 'end_date', 'local_id', 'remove_assets', 'start_date', 'subtype', 'title', 'type']    
     """
