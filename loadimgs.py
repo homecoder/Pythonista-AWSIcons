@@ -6,13 +6,14 @@ Small script to import all of the AWS Photos into a single album in iOS Photos
 
 import os
 import ui
+import bz2
 import photos
 import console
 from glob import glob
+from base64 import b64decode
 
 
 class AWSImageExporter (object):
-    
     
     def __init__(self, source_path=None):
         
@@ -166,6 +167,104 @@ class AWSImageExporter (object):
             count += 1
             
 
+class CategoriesDataSource (object):
+    def tableview_number_of_sections(self, tableview):
+        # Return the number of sections (defaults to 1)
+        return 1
+
+    def tableview_number_of_rows(self, tableview, section):
+        # Return the number of rows in the section
+        return 0
+
+    def tableview_cell_for_row(self, tableview, section, row):
+        # Create and return a cell for the given section/row
+        cell = ui.TableViewCell()
+        cell.text_label.text = 'Foo Bar'
+        return cell
+
+    def tableview_title_for_header(self, tableview, section):
+        # Return a title for the given section.
+        # If this is not implemented, no section headers will be shown.
+        return 'Some Section'
+
+    def tableview_can_delete(self, tableview, section, row):
+        # Return True if the user should be able to delete the given row.
+        return True
+
+    def tableview_can_move(self, tableview, section, row):
+        # Return True if a reordering control should be shown for the given row (in editing mode).
+        return True
+
+    def tableview_delete(self, tableview, section, row):
+        # Called when the user confirms deletion of the given row.
+        pass
+
+    def tableview_move_row(self, tableview, from_section, from_row, to_section, to_row):
+        # Called when the user moves a row with the reordering control (in editing mode).
+        pass
+
+    def tableview_did_select(self, tableview, section, row):
+        # Called when a row was selected.
+        pass
+
+    def tableview_did_deselect(self, tableview, section, row):
+        # Called when a row was de-selected (in multiple selection mode).
+        pass
+
+    def tableview_title_for_delete_button(self, tableview, section, row):
+        # Return the title for the 'swipe-to-***' button.
+        return 'Delete'
+
+
+class ImagesDatasource (object):
+    def tableview_number_of_sections(self, tableview):
+        # Return the number of sections (defaults to 1)
+        return 1
+
+    def tableview_number_of_rows(self, tableview, section):
+        # Return the number of rows in the section
+        return 0
+
+    def tableview_cell_for_row(self, tableview, section, row):
+        # Create and return a cell for the given section/row
+        cell = ui.TableViewCell()
+        cell.text_label.text = 'Foo Bar'
+        return cell
+
+    def tableview_title_for_header(self, tableview, section):
+        # Return a title for the given section.
+        # If this is not implemented, no section headers will be shown.
+        return 'Some Section'
+
+    def tableview_can_delete(self, tableview, section, row):
+        # Return True if the user should be able to delete the given row.
+        return True
+
+    def tableview_can_move(self, tableview, section, row):
+        # Return True if a reordering control should be shown for the given row (in editing mode).
+        return True
+
+    def tableview_delete(self, tableview, section, row):
+        # Called when the user confirms deletion of the given row.
+        pass
+
+    def tableview_move_row(self, tableview, from_section, from_row, to_section, to_row):
+        # Called when the user moves a row with the reordering control (in editing mode).
+        pass
+
+    def tableview_did_select(self, tableview, section, row):
+        # Called when a row was selected.
+        pass
+
+    def tableview_did_deselect(self, tableview, section, row):
+        # Called when a row was de-selected (in multiple selection mode).
+        pass
+
+    def tableview_title_for_delete_button(self, tableview, section, row):
+        # Return the title for the 'swipe-to-***' button.
+        return 'Delete'
+
+
 class ExporterGUI (ui.View):
     """
     UI and Implementation of AWSImageExporter
@@ -205,78 +304,70 @@ class ExporterGUI (ui.View):
         # Remove duplicates in categories, and sort
         self.categories = sorted(list(set(self.categories)))
         
-        
-        title_text = 'AWS Image Export'
-        title_font = ('<System>', 22)
-        _, title_height = ui.measure_string(
-                              title_text,
-                              max_width=w,
-                              font=title_font,
-                              alignment=ui.ALIGN_CENTER)
-        title_y = int(h * 0.06)
-        title = ui.Label(
-                    text=title_text,
-                    name='title',
-                    frame=(0, title_y, w, title_height),
-                    font=title_font,
-                    alignment=ui.ALIGN_CENTER,
-                    flex='WB'
-                )
-        
-        # Preview Image
-        pi_y = (title_y+title_height+buffer)
-        pi_x = (w / 2) - 45
-        self.preview_image = ui.ImageView(flex='LBR')
-        self.preview_image.frame = (
-            pi_x,
-            pi_y,
-            75,
-            75,
+        pyui = bz2.decompress(
+            b64decode(self._load_ui())
         )
+        self.content_view = ui.load_view_str(pyui.decode('utf-8'))
+        self.content_view.background_color = '#333'
+        self.content_view.frame = self.frame
+        self.content_view.flex = 'WH'
+        self.add_subview(self.content_view)
         
-        self.preview_image.image = (
-            ui.Image('images/Database_AmazonElasticCache_Memcached.png')
-        )
+        # Setup the various connections
+        self.main = self.content_view['main']
+        self.label_image_num = self.main['image_num']
+        self.preview_image = self.main['preview_image']
+        self.preview_category = self.main['preview_category']
+        self.list_set = self.main['list_set']
+        self.list_view = self.main['list_view']
+        self.label_category_preview = self.main['label_category_preview']
+        self.label_image_preview = self.main['label_image_preview']
         
-        self.demo_image_id = 0
+        # Default View
+        self.preview_category.image = ui.Image('images/Database_AmazonElasticCache_Memcached.png')
+        self.preview_image.image = ui.Image('images/Database_AmazonElasticCache_Redis.png')
         
-        ui.delay(self.preview_image_demo, 3)
+        self.label_image_num.text = str(len(self.all_images))
         
-        # Status Label
+
+        #self.demo_image_id = 0
+        #ui.delay(self.preview_image_demo, 3)
         
-        sl_y = (pi_y+75+buffer)
-        self.status_label_text = '{} Images to Export'.format(len(self.all_images))
-        _, sl_h = ui.measure_string(
-            self.status_label_text,
-            max_width=w,
-            font=title_font,
-            alignment=ui.ALIGN_CENTER)
+    def _load_ui(self):
+        ### UI - Used ui Packer by OMZ
+        return '''\
+QlpoOTFBWSZTWSir9ikABdPfgHVQUGd/9T/kHY6/79/+UAU73mdDygejZ6KA
+sNKjT0mRtEMgZNMgMQ00Gg00GmQA0IZAIaEk0NANANBoD1AAAJEIpQP1I2UN
+DT1AybQ9UZtUaaD0QyNAIlJNNTIaNNAAAAAAAAaAFSU0CNBpMp6iHqaZAGgx
+ABhGJ6mmZLaTSYA0CRxgYL+P/YQEsrmhS7WgJaMKwFCWFDgMDrUtEXioRjjm
+UDEioAGIqiaaqlvzpRCEhAtxaQoRaQSXFQCCVd1AbIJWoUzrNcx4dWrs65+o
+sAZMzMyMKYD6xQlCUhYSXQqUImEi4JiO8dmj0Ggcy+WNuqPymygGEe41CLBb
+gi+LqaFqSgXrHE9RiyJDWjEhfAMQOdVC4CIE6Bkz8IE6uFuC4UQMGDbd72kd
+4BjRDSLWcDlhDtCV0F4FZlgL3uUUlVRIXYXaLpBkKg0PSbO7CNpkzAW1xKTA
+KAgCBL0tKm7EBD0tsJGZmgIS1+qwSsgjM5TtIQTsPe8KwWhEBYdAMgaoB0T8
+DJM1nATh6uy6zSR5w1wyS5w9HtM+eBAUAMiMiIR19PIQ0QoEoPpoh2mKy5G2
+1SQSqgEZ4XaAKUYZ8H5JsZ4qdwbtHs0c6VARjVkK9wQMU6WzJSMmO2ODoDKW
+Tie4yCHthwwYUA9ji6F9L4E6yklOFtyWzkAY2EnjcfIbbOewDamrpixEkYHh
+YgQIuTdcRu98Z0iiv2xakIUG83jGzsTCUCokq5kKP2dLV6rWb7aJEwZmGeLi
+AckSGNdXDMapvV6JKsyqJhsVpdY7UpngPKxxyji5nkGiWUoHNQM6uSMaRMVC
+1RZ2FUTM4gw/hg5Zb7VrjmZYmNqpnrRVY63Vt4tZIHqcDyAbAm4b5UgDGmeL
+aVlsKrLjxM/FLkiFdbqScN62bF/eCnKQOJrq7l1CHrCo8wy3ujUxet9OVrTn
+HI8sq6wrN1kiso6ikQ2Jurawa7ZvktT4Atxf1gwX+chAGZAcQaPaJpaRHBoz
+444gcf4NeW/lzG+vArl46rBAXf44Wl6bCroo+sXz1PA8kxm8OpuGAXyH+MyO
+J2rMke5U+DjI0ose1HpeduLxW1UUIMcsSW0KK3moLVsLoljY/niyL1m6Qe+L
+l6nYpr36XSqsiyKVPazuPX3yWR1vjly3poVeYZdkul665F6N33a6cOcWklyO
+uR0uHGDjRG7pJM+9KijumyZcNyGYhqNPtf5hG5fvhcyGXqq8YrKivA2JmtmC
+LJMpYjqsildqNDZiySw1xLd0dKKKxwxkHeOkuZ3Zf8s2malDOdJiyL0YlmkL
+kpWSzai7JwTs4Q8LmnI34z33TOcyu7SatU1SWm+Q5F5tjii4ppM7WKml3bdI
+ZNtVEcRlI0tUOhHN8xlg4nQ8NJpUVmYc0c8F5gbbGxG48EphqjB8ZWaNhnCz
+sk2zTqjSG+cqDGrpUk2T5DONx8TCBAPZjAiyRiRhEl1Qv112sKhjjSWIGz5D
+5D7BJ0mVoTp9KuvpsoiVD/4u5IpwoSBRV+xS'''
+
+
+    def draw(self):
+        #self.content_view.frame = self.frame
+        pass
         
-        status_label = ui.Label(
-            text=self.status_label_text,
-            frame=(0, sl_y, w, sl_h),
-            alignment=ui.ALIGN_CENTER,
-            flex='WB'
-        )
-        
-        # Now - instead of whatever I was thinking before..
-        
-        # Setup Select Category Button
-        self.sc_button = ui.Button(
-            name='sc_button',
-            title='Select Categories',
-            action=None # TODO: Set Action
-        )
-        
-        # TODO: Reset Categories Button
-        
-        # TODO: Start Export Button
-        
-        
-        
-        self.add_subview(self.preview_image)
-        self.add_subview(title)
-        self.add_subview(status_label)
     
     def preview_image_demo(self, sender=None):
         """
@@ -338,6 +429,6 @@ if __name__ == '__main__':
     """
     awsie = AWSImageExporter()
     v = ExporterGUI()
-    #v.present('sheet')
-    v.present('panel')
+    v.present('sheet')
+    #v.present('panel')
 
