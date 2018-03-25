@@ -24,9 +24,12 @@ def set_layout_view_style(view):
                 setattr(view, key, value)
             except AttributeError as e:
                 pass
+
+
 def toggle_checkmark(sender=None):
     accessories = ['checkmark', '']
     if sender:
+        item = sender.items[sender.selected_row]
         item_at = sender.items[sender.selected_row]['accessory_type']
         item_id = accessories.index(item_at)
         item_at = accessories[int(not item_id)]
@@ -63,7 +66,7 @@ for image in sample_images:
     })
 
 list_data = ui.ListDataSource(images_list)
-list_data.action = cell_info
+list_data.action = toggle_checkmark
 
 v = ui.load_view()
 
