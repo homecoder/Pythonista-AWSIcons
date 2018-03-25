@@ -81,3 +81,10 @@ In the end the developer could pull all TODOs out and specify them in the README
 * Add YAML capabilities for config
 * Create a better Markdown editor for the wrench menu, essentially creating a full README utility rather than just TODOs
 
+
+## test
+
+```python
+    import os
+    print('cd "{}"'.format(os.path.getcwd()))
+```

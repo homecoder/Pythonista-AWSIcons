@@ -1,0 +1,55 @@
+[
+  {
+    "nodes" : [
+      {
+        "nodes" : [
+          {
+            "nodes" : [
+
+            ],
+            "frame" : "{{0, 0}, {320, 441}}",
+            "class" : "WebView",
+            "attributes" : {
+              "flex" : "WH",
+              "frame" : "{{60, 124}, {200, 200}}",
+              "uuid" : "FBF098E2-A3C2-40F3-9E00-D3C59C90DCDE",
+              "border_color" : "RGBA(1.000000,1.000000,1.000000,1.000000)",
+              "class" : "WebView",
+              "scales_to_fit" : false,
+              "name" : "markdown_view"
+            },
+            "selected" : false
+          }
+        ],
+        "frame" : "{{0, 39}, {320, 441}}",
+        "class" : "NavigationView",
+        "attributes" : {
+          "uuid" : "53A152BE-A710-4499-AC73-26BDE5D73653",
+          "root_view_name" : "<filename>",
+          "corner_radius" : 0,
+          "background_color" : "RGBA(1.000000,1.000000,1.000000,1.000000)",
+          "frame" : "{{0, 80}, {320, 320}}",
+          "border_color" : "RGBA(0.800000,0.800000,0.800000,1.000000)",
+          "border_width" : 0.5,
+          "title_color" : "RGBA(0.33, 0.33, 0.33, 1.0)",
+          "title_bar_color" : "RGBA(1.0, 1.0, 1.0, 1.0)",
+          "class" : "NavigationView",
+          "name" : "navigation",
+          "flex" : "WH"
+        },
+        "selected" : true
+      }
+    ],
+    "frame" : "{{0, 0}, {320, 480}}",
+    "class" : "View",
+    "attributes" : {
+      "name" : "main",
+      "enabled" : true,
+      "tint_color" : "RGBA(0.000000,0.478000,1.000000,1.000000)",
+      "border_color" : "RGBA(0.000000,0.000000,0.000000,1.000000)",
+      "background_color" : "RGBA(1.000000,1.000000,1.000000,1.000000)",
+      "flex" : ""
+    },
+    "selected" : false
+  }
+]
