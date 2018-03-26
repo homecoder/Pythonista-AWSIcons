@@ -170,6 +170,8 @@ class AWSImageExporter (object):
 class CategoriesDataSource (object):
     def tableview_number_of_sections(self, tableview):
         # Return the number of sections (defaults to 1)
+        #return len()
+        
         return 1
 
     def tableview_number_of_rows(self, tableview, section):
